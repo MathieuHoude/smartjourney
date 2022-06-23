@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import click
 import logging
+import sys
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
+
+import pandas as pd
 
 
 @click.command()
@@ -12,6 +15,16 @@ def main(input_filepath, output_filepath):
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
+    dataset = None
+    if input_filepath.endswith('.csv'):
+        dataset = pd.read_csv(input_filepath)
+    elif input_filepath.endswith('.json'):
+        dataset = pd.read_json(input_filepath)
+    else:
+        logger.error('Invalid input_filepath')
+        sys.exit()
+    dataset.columns = dataset.columns.str.upper().str.replace(' ', '')
+    dataset.to_csv(output_filepath)
     logger = logging.getLogger(__name__)
     logger.info('making final data set from raw data')
 
