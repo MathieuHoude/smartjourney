@@ -9,6 +9,7 @@ import pandas as pd
 
 def build_inspection_dataset():
     inspected = pd.read_csv('./data/interim/inspected.csv')
+    order = pd.read_csv('./data/processed/order.csv')
 
     inspected["EARLIEST_INSPECTION_DATE"] = pd.to_datetime(inspected["EARLIEST_INSPECTION_DATE"])
     inspected.sort_values(by='EARLIEST_INSPECTION_DATE', inplace=True)
@@ -50,6 +51,8 @@ def build_inspection_dataset():
     inspection_per_elevator['CURRENT'] = inspection_count_per_elevator['ELEVATINGDEVICESNUMBER'].map(latestInspections['INSPECTIONOUTCOME'])
     inspection_per_elevator = inspection_per_elevator.dropna()
     inspection_per_elevator['CURRENT'] =  pd.factorize( inspection_per_elevator['CURRENT'] )[0]
+
+    inspection_per_elevator['DIRECTIVEWITHINFORMATION'] = order['DIRECTIVEWITHINFORMATION']
     inspection_per_elevator.to_csv('./data/processed/inspection_per_elevator.csv')
 
 def build_order_dataset():
@@ -61,7 +64,8 @@ def build_order_dataset():
     order["DIRECTIVEWITHINFORMATION"] = order[["DIRECTIVE", "INSPECTIONSADDITIONALINFORMATION"]].agg(' '.join,axis=1)
 
     order["RISKSCORE"] = order["RISKSCORE"].fillna(0)
+    
     order.to_csv("./data/processed/order.csv")
 
-# build_inspection_dataset()
 build_order_dataset()
+build_inspection_dataset()
