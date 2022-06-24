@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
+
 
 # def generate_dummies(df, columns):
 
@@ -61,12 +61,7 @@ def build_order_dataset():
     order["DIRECTIVEWITHINFORMATION"] = order[["DIRECTIVE", "INSPECTIONSADDITIONALINFORMATION"]].agg(' '.join,axis=1)
 
     order["RISKSCORE"] = order["RISKSCORE"].fillna(0)
-    
-    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-    #Sentences are encoded by calling model.encode()
-    order["EMBEDDINGS"] = model.encode(order["DIRECTIVEWITHINFORMATION"].to_list())
-    print(order["EMBEDDINGS"])
-    order.to_csv("./data/processed/order_with_embeddings.csv")
+    order.to_csv("./data/processed/order.csv")
 
 # build_inspection_dataset()
 build_order_dataset()
