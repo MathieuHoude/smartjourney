@@ -7,7 +7,7 @@ from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_score
 import pandas as pd
-from sentence_transformers import SentenceTransformer, losses
+from sentence_transformers import SentenceTransformer,InputExample, losses
 from numpy import mean, std
 from torch.utils.data import DataLoader
 
@@ -53,9 +53,12 @@ def train_inspection_predictions():
     y = inspection_per_elevator["CURRENT"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
 
+    #Define your train examples. You need more than just two examples...
+    train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
+
     model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
     #Sentences are encoded by calling model.encode()
-    train_dataloader = DataLoader(X_train["DIRECTIVEWITHINFORMATION"], shuffle=False, batch_size=16)
+    train_dataloader = DataLoader(train_examples, shuffle=False, batch_size=16)
     train_loss = losses.CosineSimilarityLoss(model)
     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100)
     inspection_per_elevator["EMBEDDINGS"] = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
