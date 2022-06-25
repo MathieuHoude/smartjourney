@@ -56,7 +56,7 @@ def train_inspection_predictions():
     column = list(X_train["DIRECTIVEWITHINFORMATION"])
     train_examples = []
     for e in column:
-        train_examples.append(InputExample(texts=[e], label=0.8))
+        train_examples.append(InputExample(texts=[e]))
 
     #Define your train examples. You need more than just two examples...
     # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
@@ -64,7 +64,7 @@ def train_inspection_predictions():
     model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
     #Sentences are encoded by calling model.encode()
     train_dataloader = DataLoader(train_examples, shuffle=False, batch_size=16)
-    train_loss = losses.CosineSimilarityLoss(model)
+    train_loss = losses.BatchAllTripletLoss(model)
     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100)
     inspection_per_elevator["EMBEDDINGS"] = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
     print(inspection_per_elevator["EMBEDDINGS"])
