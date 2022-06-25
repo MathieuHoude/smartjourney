@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_score
 import pandas as pd
 from sentence_transformers import SentenceTransformer,InputExample, losses
-from numpy import mean, std
+from numpy import column_stack, mean, std
 from torch.utils.data import DataLoader
 
 features = ['ELEVATINGDEVICESNUMBER', 'INSPECTIONTYPE_ED-Enforcement Action',
@@ -53,8 +53,13 @@ def train_inspection_predictions():
     y = inspection_per_elevator["CURRENT"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
 
+    column = list(X_train["DIRECTIVEWITHINFORMATION"])
+    train_examples = []
+    for e in column:
+        train_examples.append(InputExample(texts=[e]))
+
     #Define your train examples. You need more than just two examples...
-    train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
+    # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
 
     model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
     #Sentences are encoded by calling model.encode()
