@@ -53,21 +53,12 @@ def train_inspection_predictions():
     y = inspection_per_elevator["CURRENT"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
 
-    column = list(X_train["DIRECTIVEWITHINFORMATION"])
-    train_examples = []
-    for e in column:
-        train_examples.append(InputExample(texts=[e]))
+    train_sentenceTransformer(list(X_train["DIRECTIVEWITHINFORMATION"]))
 
-    #Define your train examples. You need more than just two examples...
-    # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
-
-    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-    #Sentences are encoded by calling model.encode()
-    train_dataloader = DataLoader(train_examples, shuffle=False, batch_size=16)
-    train_loss = losses.BatchAllTripletLoss(model)
-    model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100)
-    inspection_per_elevator["EMBEDDINGS"] = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
-    print(inspection_per_elevator["EMBEDDINGS"])
+    model = SentenceTransformer('./models/')
+    sentence_embeddings  = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
+    inspection_per_elevator = inspection_per_elevator.join(pd.DataFrame(sentence_embeddings).add_prefix("EMBEDDING-"))
+    print(inspection_per_elevator)
     inspection_per_elevator.to_csv("./data/processed/order_with_embeddings.csv")
     # print()
     # print(X)
@@ -94,5 +85,19 @@ def train_inspection_predictions():
     # print(scores)
     # pipeline.fit(X_train, y_train)
     # print(pipeline.score(X_test, y_test))
+
+def train_sentenceTransformer(sentences):
+    train_examples = []
+    for e in sentences:
+        train_examples.append(InputExample(texts=[e]))
+
+    #Define your train examples. You need more than just two examples...
+    # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
+
+    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+    #Sentences are encoded by calling model.encode()
+    train_dataloader = DataLoader(train_examples, shuffle=False, batch_size=16)
+    train_loss = losses.BatchAllTripletLoss(model)
+    model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100, output_path="./models/",checkpoint_path="./models/checkpoints/")
 
 train_inspection_predictions()
