@@ -56,7 +56,7 @@ def train_inspection_predictions():
     column = list(X_train["DIRECTIVEWITHINFORMATION"])
     train_examples = []
     for e in column:
-        train_examples.append(InputExample(texts=[e]))
+        train_examples.append(InputExample(texts=[e], label=0.8))
 
     #Define your train examples. You need more than just two examples...
     # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]

@@ -53,6 +53,7 @@ def build_inspection_dataset():
     inspection_per_elevator['CURRENT'] =  pd.factorize( inspection_per_elevator['CURRENT'] )[0]
 
     inspection_per_elevator['DIRECTIVEWITHINFORMATION'] = order['DIRECTIVEWITHINFORMATION']
+    inspection_per_elevator['DIRECTIVEWITHINFORMATION'] = inspection_per_elevator['DIRECTIVEWITHINFORMATION'].fillna(" ")
     inspection_per_elevator.to_csv('./data/processed/inspection_per_elevator.csv')
 
 def build_order_dataset():
