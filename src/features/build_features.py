@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer,InputExample, losses
-from src.models.train_model import features
+# from src.models.train_model import features
 from torch.utils.data import DataLoader
 # def generate_dummies(df, columns):
 
@@ -69,28 +69,28 @@ def build_order_dataset():
     
     order.to_csv("./data/processed/order.csv")
 
-def generate_embeddings():
-    inspection_per_elevator = pd.read_csv('./data/processed/inspection_per_elevator.csv')
-    X = inspection_per_elevator[features]
-    y = inspection_per_elevator["CURRENT"]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
+# def generate_embeddings():
+#     inspection_per_elevator = pd.read_csv('./data/processed/inspection_per_elevator.csv')
+#     X = inspection_per_elevator[features]
+#     y = inspection_per_elevator["CURRENT"]
+#     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
 
-    column = list(X_train["DIRECTIVEWITHINFORMATION"])
-    train_examples = []
-    for e in column:
-        train_examples.append(InputExample(texts=[e]))
+#     column = list(X_train["DIRECTIVEWITHINFORMATION"])
+#     train_examples = []
+#     for e in column:
+#         train_examples.append(InputExample(texts=[e]))
 
-    #Define your train examples. You need more than just two examples...
-    # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
+#     #Define your train examples. You need more than just two examples...
+#     # train_examples = [InputExample(texts=X_train["DIRECTIVEWITHINFORMATION"], label=0.8)]
 
-    model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-    #Sentences are encoded by calling model.encode()
-    train_dataloader = DataLoader(train_examples, shuffle=False, batch_size=16)
-    train_loss = losses.BatchAllTripletLoss(model)
-    model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100)
-    inspection_per_elevator["EMBEDDINGS"] = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
-    print(inspection_per_elevator["EMBEDDINGS"])
-    inspection_per_elevator.to_csv("./data/processed/order_with_embeddings.csv")
+#     model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+#     #Sentences are encoded by calling model.encode()
+#     train_dataloader = DataLoader(train_examples, shuffle=False, batch_size=16)
+#     train_loss = losses.BatchAllTripletLoss(model)
+#     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100)
+#     inspection_per_elevator["EMBEDDINGS"] = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
+#     print(inspection_per_elevator["EMBEDDINGS"])
+#     inspection_per_elevator.to_csv("./data/processed/order_with_embeddings.csv")
 
 
 build_order_dataset()

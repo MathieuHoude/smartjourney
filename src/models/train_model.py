@@ -57,7 +57,7 @@ def generate_embeddings():
 
     model = SentenceTransformer('./models/')
     sentence_embeddings  = model.encode(inspection_per_elevator["DIRECTIVEWITHINFORMATION"].to_list())
-    inspection_per_elevator = inspection_per_elevator.join(pd.DataFrame(sentence_embeddings).add_prefix("EMBEDDING-"))
+    inspection_per_elevator = inspection_per_elevator.join(pd.DataFrame(sentence_embeddings).add_prefix("EMBEDDING - "))
     print(inspection_per_elevator)
     inspection_per_elevator.to_csv("./data/processed/order_with_embeddings.csv")
 
@@ -80,6 +80,8 @@ def train_sentenceTransformer(sentences):
 def train_inspection_predictions():
     inspection_per_elevator = pd.read_csv('./data/processed/order_with_embeddings.csv')
 
+    embedding_columns = [col for col in inspection_per_elevator.columns if 'EMBEDDING' in col]
+    features = features + embedding_columns
     X = inspection_per_elevator[features]
     y = inspection_per_elevator["CURRENT"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
