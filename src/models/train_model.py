@@ -115,7 +115,9 @@ def train_inspection_predictions(model, solver):
 
 #generate_embeddings()
 solvers = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+
+print("~~~~~~~~~~~~~~~LogisticRegression~~~~~~~~~~~~~~~")
 for solver in solvers:
-    print("~~~~~~~~~~~~~~~LogisticRegression~~~~~~~~~~~~~~~")
     model = LogisticRegression(solver=solver)
     train_inspection_predictions(model, solver)
+print("~~~~~~~~~~~~~~~LogisticRegression~~~~~~~~~~~~~~~")
