@@ -45,11 +45,11 @@ features = ['ELEVATINGDEVICESNUMBER', 'INSPECTIONTYPE_ED-Enforcement Action',
        'INSPECTIONOUTCOME_Follow up Sub Major', 'INSPECTIONOUTCOME_Other',
        'INSPECTIONOUTCOME_Passed', 'INSPECTIONOUTCOME_Passed Major',
        'INSPECTIONOUTCOME_Shutdown', 'INSPECTIONOUTCOME_Unable to Inspect',
-       'CURRENT', 'DIRECTIVEWITHINFORMATION']
+       'CURRENT']
 
 def generate_embeddings():
     inspection_per_elevator = pd.read_csv('./data/processed/inspection_per_elevator.csv')
-    X = inspection_per_elevator[features]
+    X = inspection_per_elevator['DIRECTIVEWITHINFORMATION']
     y = inspection_per_elevator["CURRENT"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
 
@@ -81,8 +81,8 @@ def train_inspection_predictions():
     inspection_per_elevator = pd.read_csv('./data/processed/order_with_embeddings.csv')
 
     embedding_columns = [col for col in inspection_per_elevator.columns if 'EMBEDDING' in col]
-    features = features + embedding_columns
-    X = inspection_per_elevator[features]
+    _features = features + embedding_columns
+    X = inspection_per_elevator[_features]
     y = inspection_per_elevator["CURRENT"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
 
@@ -90,11 +90,11 @@ def train_inspection_predictions():
     # transforms.append(('mms', MinMaxScaler()))
     transforms.append(('ss', StandardScaler()))
     # transforms.append(('rs', RobustScaler()))
-    transforms.append(('pca', PCA(n_components=7)))
+    #transforms.append(('pca', PCA(n_components=7)))
 
     # create the feature union
     fu = FeatureUnion(transforms)
-    model = LogisticRegression(solver='liblinear')
+    model = LogisticRegression(solver='newton-cg')
     steps = list()
     steps.append(('fu', fu))
     steps.append(('m', model))
@@ -110,5 +110,5 @@ def train_inspection_predictions():
     pipeline.fit(X_train, y_train)
     print(pipeline.score(X_test, y_test))
 
-generate_embeddings()
+#generate_embeddings()
 train_inspection_predictions()
