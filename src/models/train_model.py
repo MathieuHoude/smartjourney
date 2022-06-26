@@ -77,7 +77,7 @@ def train_sentenceTransformer(sentences):
     train_loss = losses.BatchAllTripletLoss(model)
     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100, output_path="./models/",checkpoint_path="./models/checkpoints/")
 
-def train_inspection_predictions():
+def train_inspection_predictions(model, solver):
     inspection_per_elevator = pd.read_csv('./data/processed/order_with_embeddings.csv')
 
     embedding_columns = [col for col in inspection_per_elevator.columns if 'EMBEDDING' in col]
@@ -94,21 +94,27 @@ def train_inspection_predictions():
 
     # create the feature union
     fu = FeatureUnion(transforms)
-    model = LogisticRegression(solver='newton-cg')
+    
     steps = list()
     steps.append(('fu', fu))
     steps.append(('m', model))
     pipeline = Pipeline(steps=steps)
-
+    pipeline.fit(X_train, y_train)
     # define the cross-validation procedure
     cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
     # evaluate model
     scores = cross_val_score(pipeline, X_train, y_train, scoring='accuracy', cv=cv, n_jobs=-1)
     # report performance
+    print("------------------------------")
+    print("Solver: " + solver)
+    print("Fit + Score results: " + pipeline.score(X_test, y_test))
+    print("Cross-validation output:")
     print('Accuracy: %.3f (%.3f)' % (mean(scores), std(scores)))
-    print(scores)
-    pipeline.fit(X_train, y_train)
-    print(pipeline.score(X_test, y_test))
+    
 
 #generate_embeddings()
-train_inspection_predictions()
+solvers = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+for solver in solvers:
+    print("~~~~~~~~~~~~~~~LogisticRegression~~~~~~~~~~~~~~~")
+    model = LogisticRegression(solver=solver)
+    train_inspection_predictions(model, solver)
