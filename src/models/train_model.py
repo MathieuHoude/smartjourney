@@ -47,7 +47,7 @@ features = ['ELEVATINGDEVICESNUMBER', 'INSPECTIONTYPE_ED-Enforcement Action',
        'INSPECTIONOUTCOME_Shutdown', 'INSPECTIONOUTCOME_Unable to Inspect',
        'CURRENT', 'DIRECTIVEWITHINFORMATION']
 
-def train_inspection_predictions():
+def generate_embeddings():
     inspection_per_elevator = pd.read_csv('./data/processed/inspection_per_elevator.csv')
     X = inspection_per_elevator[features]
     y = inspection_per_elevator["CURRENT"]
@@ -60,31 +60,8 @@ def train_inspection_predictions():
     inspection_per_elevator = inspection_per_elevator.join(pd.DataFrame(sentence_embeddings).add_prefix("EMBEDDING-"))
     print(inspection_per_elevator)
     inspection_per_elevator.to_csv("./data/processed/order_with_embeddings.csv")
-    # print()
-    # print(X)
-    # transforms = list()
-    # # transforms.append(('mms', MinMaxScaler()))
-    # transforms.append(('ss', StandardScaler()))
-    # # transforms.append(('rs', RobustScaler()))
-    # transforms.append(('pca', PCA(n_components=7)))
 
-    # # create the feature union
-    # fu = FeatureUnion(transforms)
-    # model = LogisticRegression(solver='liblinear')
-    # steps = list()
-    # steps.append(('fu', fu))
-    # steps.append(('m', model))
-    # pipeline = Pipeline(steps=steps)
-
-    # # define the cross-validation procedure
-    # cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
-    # # evaluate model
-    # scores = cross_val_score(pipeline, X_train, y_train, scoring='accuracy', cv=cv, n_jobs=-1)
-    # # report performance
-    # print('Accuracy: %.3f (%.3f)' % (mean(scores), std(scores)))
-    # print(scores)
-    # pipeline.fit(X_train, y_train)
-    # print(pipeline.score(X_test, y_test))
+    
 
 def train_sentenceTransformer(sentences):
     train_examples = []
@@ -100,4 +77,36 @@ def train_sentenceTransformer(sentences):
     train_loss = losses.BatchAllTripletLoss(model)
     model.fit(train_objectives=[(train_dataloader, train_loss)], epochs=1, warmup_steps=100, output_path="./models/",checkpoint_path="./models/checkpoints/")
 
+def train_inspection_predictions():
+    inspection_per_elevator = pd.read_csv('./data/processed/order_with_embeddings.csv')
+
+    X = inspection_per_elevator[features]
+    y = inspection_per_elevator["CURRENT"]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False)
+
+    transforms = list()
+    # transforms.append(('mms', MinMaxScaler()))
+    transforms.append(('ss', StandardScaler()))
+    # transforms.append(('rs', RobustScaler()))
+    transforms.append(('pca', PCA(n_components=7)))
+
+    # create the feature union
+    fu = FeatureUnion(transforms)
+    model = LogisticRegression(solver='liblinear')
+    steps = list()
+    steps.append(('fu', fu))
+    steps.append(('m', model))
+    pipeline = Pipeline(steps=steps)
+
+    # define the cross-validation procedure
+    cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+    # evaluate model
+    scores = cross_val_score(pipeline, X_train, y_train, scoring='accuracy', cv=cv, n_jobs=-1)
+    # report performance
+    print('Accuracy: %.3f (%.3f)' % (mean(scores), std(scores)))
+    print(scores)
+    pipeline.fit(X_train, y_train)
+    print(pipeline.score(X_test, y_test))
+
+generate_embeddings()
 train_inspection_predictions()
